@@ -1,11 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import financeManagerReducer from './FinanceSlice';
+import authorizationReducer from './AuthorizationSlice';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+
 
 export const store = configureStore({
 
   reducer: {
-    financeManager : financeManagerReducer
+    financeManager : financeManagerReducer,
+    authorization: authorizationReducer
   },
   
 })

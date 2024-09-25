@@ -1,42 +1,45 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Main from './components/Main';
-import Register from './components/Register';
-import Navbar from './components/Navbar';
-import Edit from './components/Edit';
-import Transactions from './components/Transactions';
-import CreateTransaction from './components/CreateTransaction';
-import CreateIncome from './components/CreateIncome';
-import CreateSpendings from './components/CreateSpendings';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Main from "./components/Main";
+import Register from "./components/Register";
+import Navbar from "./components/Navbar";
+import Edit from "./components/Edit";
+import Transactions from "./components/Transactions";
+import CreateIncome from "./components/CreateIncome";
+import CreateSpendings from "./components/CreateSpendings";
+import ProtectedRoutes from "./components/ProtectedRoutes";
+import Profile from "./components/Profile";
+import { useAppSelector } from "./redux/store";
 
-
-import { Switch } from '@mui/material';
-
-import './App.css';
-import CreateNoteOfIncome from './components/CreateIncome';
+import "./App.css";
 
 function App() {
+  const isLog = useAppSelector((state) => state.authorization.isRegister);
   return (
     <div>
-    <BrowserRouter>
-       <Navbar/>
-      <Routes>
-        <Route path='/' element={ <Main/>}></Route>
-        <Route path='/register' element={<Register/>}></Route>
-      
-        <Route path='/createTransaction' element={<CreateTransaction/>}>
-            <Route path='income' element={<CreateIncome/>}></Route>
-            <Route path='spendings' element={<CreateSpendings/>}></Route>
-        </Route>
-        <Route path='/edit/:id' element={<Edit/>}></Route>
-        <Route path='/transactions' element={<Transactions/>}></Route>
-      </Routes>
-    
+      <BrowserRouter>
+        <Navbar >
+        <Routes>
+          <Route path="/" element={<Main />}></Route>
+          {!isLog ? (
+            <Route path="/register" element={<Register />}></Route>
+          ) : (
+            <Route path="/profile" element={<Profile />}></Route>
+          )}
+          <Route element={<ProtectedRoutes />}>
+            <Route path="/createIncome" element={<CreateIncome />}></Route>
+            <Route
+              path="/createSpendings"
+              element={<CreateSpendings />}
+            ></Route>
 
-    </BrowserRouter>
+            <Route path="/edit/:id" element={<Edit />}></Route>
+            <Route path="/transactions" element={<Transactions />}></Route>
+          </Route>
+        </Routes>
+        </Navbar>
+      </BrowserRouter>
     </div>
-  
-    
   );
 }
 

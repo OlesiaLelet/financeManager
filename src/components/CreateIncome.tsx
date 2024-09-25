@@ -7,20 +7,18 @@ import {
   TextField,
   FormControl,
   InputLabel,
-  Button
+  Button,
+  Box,
 } from "@mui/material";
-import {
-  LocalizationProvider,
-  DatePicker,
-} from "@mui/x-date-pickers";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { saveUpdate } from "../redux/FinanceSlice";
 import { SpendingsOrIncome } from "../redux/FinanceSlice";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DisabledByDefaultIcon from "@mui/icons-material/DisabledByDefault";
-
+import { Link } from "react-router-dom";
 
 export interface Select {
   catOfAccount: string;
@@ -30,11 +28,10 @@ export interface Errors {
   quantity: boolean;
   catOfAccount: boolean;
   catOfIncome: boolean;
-  description: boolean,
+  description: boolean;
 }
 
 export default function CreateIncome() {
-
   const categoriesOfIncome = useAppSelector(
     (state) => state.financeManager.categoryOfIncome
   );
@@ -50,10 +47,9 @@ export default function CreateIncome() {
 
   const [date, setDate] = React.useState<Dayjs | null>(dayjs(new Date()));
   console.log(date);
-  
+
   const dateObject = date?.toDate();
   console.log(dateObject);
-  
 
   const [sum, setSum] = useState(0);
   const [description, setDescription] = useState<string>("");
@@ -65,8 +61,10 @@ export default function CreateIncome() {
     quantity: false,
     catOfAccount: false,
     catOfIncome: false,
-    description: false
+    description: false,
   });
+
+  const [isDisabled, setIsDisabled] = useState(true);
 
   const handlerSelect = (event: SelectChangeEvent<string>) => {
     const { value, name } = event.target;
@@ -81,16 +79,15 @@ export default function CreateIncome() {
 
   const handlerInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    
+
     if (value.length < 20) {
-      setDescription(value)
-      setErrors((prev) => ({...prev, description: false}))
-   }
-   else {
-     setErrors((prev) => ({...prev, description: true}))
-   }  
+      setDescription(value);
+      setErrors((prev) => ({ ...prev, description: false }));
+    } else {
+      setErrors((prev) => ({ ...prev, description: true }));
+    }
   };
-  
+
   const handlerSubmit = () => {
     if (!sum) {
       setErrors((prev) => ({ ...prev, quantity: true }));
@@ -104,9 +101,12 @@ export default function CreateIncome() {
     if (!select.catOfIncome) {
       setErrors((prev) => ({ ...prev, catOfIncome: true }));
     } else {
-      const icon = categoriesOfIncome.find((item) => item.name === select.catOfIncome)
+      const icon =
+        categoriesOfIncome.find((item) => item.name === select.catOfIncome)
           ?.icon ?? DisabledByDefaultIcon;
-      const iconOfAcc= categoryOfAccount.find((item) => item.name === select.catOfAccount)?.icon ?? DisabledByDefaultIcon;
+      const iconOfAcc =
+        categoryOfAccount.find((item) => item.name === select.catOfAccount)
+          ?.icon ?? DisabledByDefaultIcon;
 
       const newTransaction: SpendingsOrIncome = {
         type: "income",
@@ -117,7 +117,7 @@ export default function CreateIncome() {
         account: select.catOfAccount,
         id: (amountOfTransactions?.length ?? 0) + 1,
         iconOfCat: icon,
-        iconOfAcc: iconOfAcc
+        iconOfAcc: iconOfAcc,
       };
       dispatch(saveUpdate(newTransaction));
       navigate("/transactions");
@@ -127,7 +127,7 @@ export default function CreateIncome() {
         quantity: false,
         catOfAccount: false,
         catOfIncome: false,
-        description: false
+        description: false,
       });
       setSelect({
         catOfAccount: "",
@@ -138,93 +138,112 @@ export default function CreateIncome() {
   };
 
   return (
-    <div>
-    
-    <form
+    <div
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 15,
         alignItems: "center",
+        gap: 20,
+        margin: "auto",
       }}
     >
-      <TextField
-        variant="standard"
-        label="Amount"
-        type="number"
-        value={sum !== 0 ? sum : ""}
-        onChange={handlerSum}
-        sx={{ width: 550 }}
-        name="quantity"
-        error={errors.quantity}
-        required
-      ></TextField>
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 10 }}>
+        {isDisabled && (
+          <span style={{ color: "grey", pointerEvents: "none" }}>Income</span>
+        )}
 
-      <TextField
-        variant="standard"
-        label="Description (optional)"
-        value={description}
-        onChange={handlerInput}
-        sx={{ width: 550 }}
-        name="description"
-        error={errors.description}
-      ></TextField>
+        <Link to={"/createSpendings"}>Spendings</Link>
+      </Box>
 
-      <FormControl>
-        <InputLabel id="IncomeCateg">Income category</InputLabel>
-        <Select
-          labelId="IncomeCateg"
-          label="Category Of income"
-          required
-          value={select.catOfIncome}
-          defaultValue={categoriesOfIncome[0].name}
-          onChange={handlerSelect}
+      <form
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 15,
+          alignItems: "center",
+          backgroundColor: "#fafafa",
+          borderRadius: 10,
+          padding: 10,
+          margin: "auto",
+        }}
+      >
+        <TextField
+          variant="standard"
+          label="Amount"
+          type="number"
+          value={sum !== 0 ? sum : ""}
+          onChange={handlerSum}
           sx={{ width: 550 }}
-          name="catOfIncome"
-          error={errors.catOfIncome}
-        >
-          {categoriesOfIncome.map((item) => (
-            <MenuItem key={item.id} value={item.name}>
-              {item.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          name="quantity"
+          error={errors.quantity}
+          required
+        ></TextField>
 
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DemoContainer components={["DatePicker"]}>
-          <DatePicker
-            value={date}
-            onChange={(newValue) => setDate(newValue)}
+        <TextField
+          variant="standard"
+          label="Description (optional)"
+          value={description}
+          onChange={handlerInput}
+          sx={{ width: 550 }}
+          name="description"
+          error={errors.description}
+        ></TextField>
+
+        <FormControl variant="standard">
+          <InputLabel id="IncomeCateg">Income category</InputLabel>
+          <Select
+            labelId="IncomeCateg"
+            label="Category Of income"
+            required
+            value={select.catOfIncome}
+            defaultValue={categoriesOfIncome[0].name}
+            onChange={handlerSelect}
             sx={{ width: 550 }}
-          />
-        </DemoContainer>
-      </LocalizationProvider>
+            name="catOfIncome"
+            error={errors.catOfIncome}
+          >
+            {categoriesOfIncome.map((item) => (
+              <MenuItem key={item.id} value={item.name}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <FormControl>
-        <InputLabel id="AccountCateg">Account category</InputLabel>
-        <Select
-          labelId="AccountCateg"
-          label="Category Of account"
-          defaultValue={categoryOfAccount[0].name}
-          value={select.catOfAccount}
-          onChange={handlerSelect}
-          error={errors.catOfAccount}
-          sx={{ width: 550 }}
-          name="catOfAccount"
-          required
-        >
-          {categoryOfAccount.map((item) => (
-            <MenuItem key={item.id} value={item.name}>
-              {item.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button sx={{ width: 550 }} variant="contained" onClick={handlerSubmit}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DemoContainer components={["DatePicker"]}>
+            <DatePicker
+              value={date}
+              onChange={(newValue) => setDate(newValue)}
+              sx={{ width: 550 }}
+            />
+          </DemoContainer>
+        </LocalizationProvider>
+
+        <FormControl variant="standard">
+          <InputLabel id="AccountCateg">Account category</InputLabel>
+          <Select
+            labelId="AccountCateg"
+            label="Category Of account"
+            defaultValue={categoryOfAccount[0].name}
+            value={select.catOfAccount}
+            onChange={handlerSelect}
+            error={errors.catOfAccount}
+            sx={{ width: 550 }}
+            name="catOfAccount"
+            required
+          >
+            {categoryOfAccount.map((item) => (
+              <MenuItem key={item.id} value={item.name}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </form>
+      <Button sx={{ width: 570 }} variant="contained" onClick={handlerSubmit}>
         Add transaction
       </Button>
-    </form>
     </div>
   );
 }
